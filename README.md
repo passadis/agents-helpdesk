@@ -1,4 +1,10 @@
-# Agentic AI Helpdesk (FastAPI + Azure + M365)
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=azure,vscode,python,html,css,github,fastapi" />
+  </a>
+</p>
+
+<h1 align="center">Agentic AI Helpdesk (FastAPI + Azure + M365)</h1
 
 This project is a complete, event-driven, AI-powered helpdesk solution. It uses FastAPI for high-performance ingestion, Azure Service Bus for decoupling, and a Python worker to enrich requests with Azure OpenAI and execute automated actions in the Microsoft 365 ecosystem.
 
@@ -30,6 +36,14 @@ This project is a complete, event-driven, AI-powered helpdesk solution. It uses 
   ```
 
 </details>
+
+<details> <summary><strong>View Screenshots</strong></summary>
+  
+![agentsbusscr1](https://github.com/user-attachments/assets/1708e213-d6c5-424d-8e76-26be0f7af47a)
+
+![agentsbusscr2](https://github.com/user-attachments/assets/e83acf97-6ac3-4922-a942-6bcd680292ae)
+
+</details
 
 <br>
 
