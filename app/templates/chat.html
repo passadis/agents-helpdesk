@@ -1,0 +1,195 @@
+<!-- app/templates/chat.html -->
+{% extends "base.html" %}
+{% block content %}
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-content">
+        <h1 class="chat-title">Analytics Assistant</h1>
+        <p class="chat-subtitle">Ask questions about your helpdesk data</p>
+      </div>
+      <div class="chat-info">
+        <span class="info-badge">Powered by AI</span>
+      </div>
+    </div>
+
+    <div class="chat-suggestions">
+      <p class="suggestions-label">Try asking:</p>
+      <div class="suggestion-chips">
+        <button class="chip" onclick="askQuestion(this.textContent)">How many IT tickets this week?</button>
+        <button class="chip" onclick="askQuestion(this.textContent)">Show high priority tasks</button>
+        <button class="chip" onclick="askQuestion(this.textContent)">What categories have the most requests?</button>
+        <button class="chip" onclick="askQuestion(this.textContent)">Recent tickets created today</button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message assistant">
+        <div class="message-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+        </div>
+        <div class="message-content">
+          <p>Hello! I can help you analyze your helpdesk data. Ask me about ticket counts, categories, priorities, or recent activity.</p>
+        </div>
+      </div>
+    </div>
+
+    <form class="chat-input-form" id="chatForm">
+      <div class="chat-input-wrapper">
+        <textarea 
+          id="chatInput" 
+          class="chat-input" 
+          placeholder="Ask about your helpdesk data..."
+          autocomplete="off"
+          required
+          rows="3"
+        ></textarea>
+        <button type="submit" class="chat-send-btn" id="sendBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Auto-resize textarea as user types
+    function autoResizeTextarea() {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 150) + 'px';
+    }
+
+    chatInput.addEventListener('input', autoResizeTextarea);
+    
+    // Handle Enter key to submit (Shift+Enter for new line)
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.requestSubmit();
+      }
+    });
+
+    function askQuestion(question) {
+      chatInput.value = question;
+      autoResizeTextarea();
+      chatForm.requestSubmit();
+    }
+
+    function addMessage(content, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+      
+      if (!isUser) {
+        messageDiv.innerHTML = `
+          <div class="message-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4"></path>
+              <path d="M12 8h.01"></path>
+            </svg>
+          </div>
+          <div class="message-content">
+            <p>${content}</p>
+          </div>
+        `;
+      } else {
+        messageDiv.innerHTML = `
+          <div class="message-content">
+            <p>${content}</p>
+          </div>
+          <div class="message-avatar user-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+        `;
+      }
+      
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addLoadingMessage() {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'message assistant loading';
+      loadingDiv.id = 'loadingMessage';
+      loadingDiv.innerHTML = `
+        <div class="message-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+        </div>
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(loadingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+      const loadingMsg = document.getElementById('loadingMessage');
+      if (loadingMsg) loadingMsg.remove();
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const question = chatInput.value.trim();
+      if (!question) return;
+
+      // Add user message
+      addMessage(question, true);
+      chatInput.value = '';
+      autoResizeTextarea(); // Reset height
+      
+      // Disable input while processing
+      chatInput.disabled = true;
+      sendBtn.disabled = true;
+      addLoadingMessage();
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ question: question })
+        });
+
+        const data = await response.json();
+        removeLoadingMessage();
+        
+        if (data.answer) {
+          addMessage(data.answer);
+        } else {
+          addMessage('Sorry, I encountered an error processing your question.');
+        }
+      } catch (error) {
+        removeLoadingMessage();
+        addMessage('Sorry, there was an error connecting to the server.');
+      } finally {
+        chatInput.disabled = false;
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }
+    });
+  </script>
+{% endblock %}

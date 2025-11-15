@@ -1,0 +1,111 @@
+# # app/services/agent.py
+# import os
+# import json
+# import asyncio
+
+# from agent_framework import ChatAgent
+# from agent_framework.azure import AzureAIAgentClient
+# from azure.core.credentials import AzureKeyCredential
+
+# async def decide_action(entity: dict) -> dict:
+#     """
+#     Given a helpdesk entity, return a JSON-like dict with an 'action' field
+#     (notify-team, create-task, create-ticket, or store-only) decided by the agent.
+#     """
+#     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+#     api_key = os.getenv("AZURE_OPENAI_KEY")
+#     deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+
+#     # If any of the required environment variables are missing, just return the actionHint
+#     if not (endpoint and api_key and deployment):
+#         action_hint = entity.get("ActionHint") or "notify-team"
+#         return {"action": action_hint}
+
+#     client = AzureAIAgentClient(
+#         endpoint=endpoint,
+#         api_key=api_key,
+#         deployment_name=deployment,
+#     )
+
+#     # Instructions to the agent: classify the request and return JSON
+#     instructions = (
+#         "You are a helpdesk routing agent. Based on the category, priority, and "
+#         "ActionHint provided, decide which action to perform. "
+#         "Valid actions: notify-team, create-task, create-ticket, store-only. "
+#         "Respond ONLY with JSON of the form {\"action\": \"<action>\"}."
+#     )
+
+#     agent = ChatAgent(chat_client=client, instructions=instructions)
+
+#     # Compose the prompt from the entity fields
+#     prompt = (
+#         f"Category: {entity.get('PartitionKey')}\n"
+#         f"Priority: {entity.get('Priority')}\n"
+#         f"ActionHint: {entity.get('ActionHint') or 'notify-team'}\n"
+#     )
+
+#     # Run the agent asynchronously
+#     result = await agent.run(prompt)
+
+#     try:
+#         # Parse the agent's JSON response
+#         return json.loads(result.text.strip())
+#     except Exception:
+#         # Fallback if parsing fails
+#         return {"action": entity.get("ActionHint") or "notify-team"}
+# app/services/agent.py
+# app/services/agent.py
+import os
+import json
+
+from agent_framework import ChatAgent
+from agent_framework.azure import AzureOpenAIChatClient
+
+
+async def decide_action(entity: dict) -> dict:
+    """
+    Given a helpdesk entity, return a JSON-like dict with an 'action' field
+    (notify-team, create-task, create-ticket, or store-only) decided by the agent.
+    """
+
+    # We'll use this only to decide whether to enable the agent at all
+    model_id = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+
+    # If the model id is missing, just fall back to ActionHint
+    if not model_id:
+        action_hint = entity.get("ActionHint") or "notify-team"
+        return {"action": action_hint}
+
+    # NOTE: AzureOpenAIChatClient reads endpoint & credentials from environment.
+    # Make sure you have the standard env vars set:
+    #   AZURE_OPENAI_ENDPOINT
+    #   AZURE_OPENAI_API_KEY
+    #   AZURE_OPENAI_CHAT_DEPLOYMENT_NAME (or similar for model_id)
+    chat_client = AzureOpenAIChatClient()
+
+    instructions = (
+        "You are a helpdesk routing agent. Based on the category, priority, and "
+        "ActionHint provided, decide which action to perform. "
+        "Valid actions: notify-team, create-task, create-ticket, store-only. "
+        "Respond ONLY with JSON of the form {\"action\": \"<action>\"}."
+    )
+
+    agent = ChatAgent(
+        name="HelpdeskRouter",
+        chat_client=chat_client,
+        instructions=instructions
+    )
+
+    prompt = (
+        f"Category: {entity.get('PartitionKey')}\n"
+        f"Priority: {entity.get('Priority')}\n"
+        f"ActionHint: {entity.get('ActionHint') or 'notify-team'}\n"
+    )
+
+    try:
+        result = await agent.run(prompt)
+        raw = result.text.strip()
+        return json.loads(raw)
+    except Exception as ex:
+        print("Agent decision failed inside decide_action:", ex)
+        return {"action": entity.get("ActionHint") or "notify-team"}

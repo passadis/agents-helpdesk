@@ -1,0 +1,106 @@
+<!-- app/templates/form.html -->
+{% extends "base.html" %}
+{% block content %}
+  <div class="form-card">
+    <div class="logo-header">
+      <img src="{{ url_for('static', path='/images/cblogsmaller.png') }}" alt="Logo" class="logo-image">
+      <h1 class="logo-title">Cloud Helpdesk</h1>
+    </div>
+    <h2 class="form-title">Create a new request</h2>
+    <p class="form-subtitle">Store to Azure, notify via Service Bus (coming next!)</p>
+
+    {% if success_msg %}
+      <div class="alert success">
+        {{ success_msg }}
+      </div>
+    {% endif %}
+
+    <form method="post" action="/submit" class="helpdesk-form">
+      <label class="field">
+        <span>Title *</span>
+        <input
+          type="text"
+          name="title"
+          required
+          value="{{ form_data.title if form_data else '' }}"
+          placeholder="e.g. New contractor onboarding"
+        />
+      </label>
+
+      <label class="field">
+        <span>Description *</span>
+        <textarea
+          name="description"
+          required
+          rows="4"
+          placeholder="Describe the request or issue..."
+        >{{ form_data.description if form_data else '' }}</textarea>
+      </label>
+
+      <div class="inline-fields">
+        <label class="field">
+          <span>Category *</span>
+          <select name="category" required>
+            {% set cat = form_data.category if form_data else '' %}
+            <option value="">-- choose --</option>
+            <option value="HR" {{ "selected" if cat=="HR" else "" }}>HR</option>
+            <option value="Finance" {{ "selected" if cat=="Finance" else "" }}>Finance</option>
+            <option value="IT" {{ "selected" if cat=="IT" else "" }}>IT</option>
+            <option value="Operations" {{ "selected" if cat=="Operations" else "" }}>Operations</option>
+            <option value="Other" {{ "selected" if cat=="Other" else "" }}>Other</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Priority *</span>
+          {% set prio = form_data.priority if form_data else '' %}
+          <select name="priority" required>
+            <option value="">-- choose --</option>
+            <option value="Low" {{ "selected" if prio=="Low" else "" }}>Low</option>
+            <option value="Normal" {{ "selected" if prio=="Normal" else "" }}>Normal</option>
+            <option value="High" {{ "selected" if prio=="High" else "" }}>High</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="inline-fields">
+        <label class="field">
+          <span>Action hint</span>
+          {% set act = form_data.actionHint if form_data else '' %}
+          <select name="actionHint">
+            <option value="">-- choose --</option>
+            <option value="notify-team" {{ "selected" if act=="notify-team" else "" }}>Notify team</option>
+            <option value="create-task" {{ "selected" if act=="create-task" else "" }}>Create task</option>
+            <option value="create-ticket" {{ "selected" if act=="create-ticket" else "" }}>Create ticket</option>
+            <option value="store-only" {{ "selected" if act=="store-only" else "" }}>Store only</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Requester email</span>
+          <input
+            type="email"
+            name="requesterEmail"
+            value="{{ form_data.requesterEmail if form_data else '' }}"
+            placeholder="user@contoso.com"
+          />
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Submit request</button>
+        <button type="reset" class="btn-secondary">Reset form</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Clear success message and form after submission
+    {% if success_msg %}
+      setTimeout(function() {
+        document.querySelector('.alert.success')?.remove();
+        document.querySelector('.helpdesk-form')?.reset();
+      }, 3000);
+    {% endif %}
+  </script>
+{% endblock %}
