@@ -206,13 +206,13 @@ You need two terminals.
 #### Terminal 1 — FastAPI Web Server
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 #### Terminal 2 — Worker
 
 ```bash
-python worker.py
+python -m app.worker
 ```
 
 ### Local Development (Docker)
