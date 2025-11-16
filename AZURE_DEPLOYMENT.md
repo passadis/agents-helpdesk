@@ -36,6 +36,22 @@ docker build -t agents-helpdesk:latest .
 
 Create a `.env` file with your configuration, then:
 
+**Option A: Using docker-compose (recommended for local testing)**
+```bash
+# Start both web and worker containers
+docker-compose up
+
+# Or run in detached mode
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+```
+
+**Option B: Using docker run**
 ```bash
 # Test the web app
 docker run -p 8000:8000 --env-file .env agents-helpdesk:latest

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # FastAPI Web Application
+  web:
+    build: .
+    container_name: helpdesk-web
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Worker Process
+  worker:
+    build: .
+    container_name: helpdesk-worker
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - web
+
+# Optional: If you want to test with Azure services locally, 
+# you would still need to configure the .env file with actual Azure credentials
