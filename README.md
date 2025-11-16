@@ -1,3 +1,5 @@
+<!-- GitAds-Verify: 3TGJ6O5X187YUEZDHZ2R68LQXDFZDGZ7 -->
+
 <p align="center">
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=azure,vscode,python,html,css,github,fastapi" />
@@ -6,7 +8,7 @@
 
 <h1 align="center">Agentic AI Helpdesk (FastAPI + Azure + M365)</h1
 
-This project is a complete, event-driven, AI-powered helpdesk solution. It uses FastAPI for high-performance ingestion, Azure Service Bus for decoupling, and a Python worker to enrich requests with Azure OpenAI and execute automated actions in the Microsoft 365 ecosystem.
+This project is a complete, event-driven, AI-powered helpdesk solution. It uses FastAPI for high-performance ingestion, Azure Service Bus for decoupling, and a Python worker to enrich requests with[...]  
 
 <br/>
 
@@ -34,7 +36,7 @@ This project is a complete, event-driven, AI-powered helpdesk solution. It uses 
     A -->|create-ticket| FLOW["Trigger Power Automate<br/>HTTP Flow (ticket)"]
     A -->|store-only| END["No further action<br/>(stored + Teams only)"]
   ```
-
+ 
 </details>
 
 <details> <summary><strong>View Screenshots</strong></summary>
