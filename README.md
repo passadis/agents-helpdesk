@@ -199,19 +199,46 @@ POWER_AUTOMATE_FLOW_URL=
 
 ## ▶️ Running the Application
 
+### Local Development (Python Virtual Environment)
+
 You need two terminals.
 
-### Terminal 1 — FastAPI Web Server
+#### Terminal 1 — FastAPI Web Server
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
-### Terminal 2 — Worker
+#### Terminal 2 — Worker
 
 ```bash
-python worker.py
+python -m app.worker
 ```
+
+### Local Development (Docker)
+
+Alternatively, you can run the application using Docker:
+
+```bash
+# Using docker-compose (runs both web and worker)
+docker-compose up
+
+# Or build and run manually
+docker build -t agents-helpdesk:latest .
+docker run -p 8000:8000 --env-file .env agents-helpdesk:latest
+```
+
+### Production Deployment
+
+For production deployment to Azure Container Apps, see the comprehensive guide:
+
+📦 **[Azure Container Apps Deployment Guide](AZURE_DEPLOYMENT.md)**
+
+This guide includes:
+- Complete Docker setup for Azure Container Apps
+- Step-by-step Azure CLI commands
+- Secret configuration and management
+- Scaling and monitoring instructions
 
 -----
 
