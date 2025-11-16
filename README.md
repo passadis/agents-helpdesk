@@ -222,3 +222,8 @@ python worker.py
 
 * Python Agent Tools  
   https://learn.microsoft.com/agent-framework/user-guide/agents/agent-tools?pivots=programming-language-python?wt.mc_id=MVP_365598
+
+  ## GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=passadis/agents-helpdesk@github)](https://gitads.dev/v1/ad-track?source=passadis/agents-helpdesk@github)
+
+
