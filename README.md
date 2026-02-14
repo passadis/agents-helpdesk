@@ -1,3 +1,10 @@
+  ## GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=passadis/agents-helpdesk@github)](https://gitads.dev/v1/ad-track?source=passadis/agents-helpdesk@github)
+
+<!-- GitAds-Verify: 3TGJ6O5X187YUEZDHZ2R68LQXDFZDGZ7 -->
+
+
+
 <p align="center">
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=azure,vscode,python,html,css,github,fastapi,docker" />
