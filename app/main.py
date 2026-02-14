@@ -21,6 +21,12 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
+@app.get("/health")
+async def health():
+    """Liveness / readiness probe for Container Apps."""
+    return {"status": "ok"}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse(

@@ -11,7 +11,7 @@ from collections import Counter
 from pydantic import Field
 
 from azure.data.tables import TableServiceClient
-from agent_framework import ChatAgent
+from agent_framework import RawAgent, FunctionTool
 from agent_framework.azure import AzureOpenAIChatClient
 
 
@@ -188,13 +188,13 @@ async def ask_analytics_agent(question: str) -> str:
         # Set up Azure OpenAI chat client
         chat_client = AzureOpenAIChatClient()
         
-        # Define tools that the agent can use (just pass the functions directly)
+        # Define tools that the agent can use (wrapped in FunctionTool)
         tools = [
-            count_tickets_by_category,
-            count_tickets_by_priority,
-            get_recent_tickets,
-            count_tickets_by_action,
-            get_total_ticket_count
+            FunctionTool(name="count_tickets_by_category", description="Count helpdesk requests by category. If category is specified, count only that category. Otherwise, return counts for all categories.", func=count_tickets_by_category),
+            FunctionTool(name="count_tickets_by_priority", description="Count helpdesk requests by priority level (Low, Normal, High).", func=count_tickets_by_priority),
+            FunctionTool(name="get_recent_tickets", description="Get recent helpdesk requests from the last N days.", func=get_recent_tickets),
+            FunctionTool(name="count_tickets_by_action", description="Count helpdesk requests by action type (notify-team, create-task, create-ticket, store-only).", func=count_tickets_by_action),
+            FunctionTool(name="get_total_ticket_count", description="Get the total count of all helpdesk requests in the system.", func=get_total_ticket_count),
         ]
         
         # Create the analytics agent
@@ -225,9 +225,9 @@ When answering:
 
 Be helpful, accurate, and insightful!"""
         
-        agent = ChatAgent(
+        agent = RawAgent(
             name="HelpdeskAnalytics",
-            chat_client=chat_client,
+            client=chat_client,
             instructions=instructions,
             tools=tools
         )

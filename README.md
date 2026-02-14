@@ -1,15 +1,10 @@
-  ## GitAds Sponsored
-[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=passadis/agents-helpdesk@github)](https://gitads.dev/v1/ad-track?source=passadis/agents-helpdesk@github)
-
-<!-- GitAds-Verify: 3TGJ6O5X187YUEZDHZ2R68LQXDFZDGZ7 -->
-
 <p align="center">
   <a href="https://skillicons.dev">
-    <img src="https://skillicons.dev/icons?i=azure,vscode,python,html,css,github,fastapi" />
+    <img src="https://skillicons.dev/icons?i=azure,vscode,python,html,css,github,fastapi,docker" />
   </a>
 </p>
 
-<h1 align="center">Agentic AI Helpdesk (FastAPI + Azure + M365)</h1
+<h1 align="center">Agentic AI Helpdesk (FastAPI + Azure + M365)</h1>
 
 This project is a complete, event-driven, AI-powered helpdesk solution. It uses FastAPI for high-performance ingestion, Azure Service Bus for decoupling, and a Python worker to enrich requests with[...]  
 
@@ -48,7 +43,7 @@ This project is a complete, event-driven, AI-powered helpdesk solution. It uses 
 
 ![agentsbusscr2](https://github.com/user-attachments/assets/e83acf97-6ac3-4922-a942-6bcd680292ae)
 
-</details
+</details>
 
 <br>
 
@@ -58,6 +53,7 @@ This project is a complete, event-driven, AI-powered helpdesk solution. It uses 
   * **Event-Driven:** Fully decoupled architecture using Azure Service Bus for resilience.
   * **AI Enrichment:** Uses Azure OpenAI to summarize, re-title, and assess the urgency of user requests.
   * **Agentic Actions:** Leverages the Microsoft Agent Framework to intelligently decide the next best action.
+  * **Analytics Chat:** An AI-powered conversational interface to query ticket data (counts by category, priority, recent tickets, etc.).
   * **M365 Integration:**
       * Posts notifications to **Microsoft Teams**.
       * Creates tasks in **Microsoft Planner** via Graph API.
@@ -199,19 +195,85 @@ POWER_AUTOMATE_FLOW_URL=
 
 ## ▶️ Running the Application
 
-You need two terminals.
-
-### Terminal 1 — FastAPI Web Server
+### Option A — Docker Compose (recommended)
 
 ```bash
-uvicorn main:app --reload
+# Build and start both services
+docker compose up --build
 ```
 
-### Terminal 2 — Worker
+This starts the **web app** on `http://localhost:8000` and the **worker** listening on the Service Bus queue. Both read from your `.env` file.
+
+To build images individually:
 
 ```bash
-python worker.py
+docker build --target web    -t helpdesk-web    .
+docker build --target worker -t helpdesk-worker .
 ```
+
+### Option B — Two Terminals (local dev)
+
+#### Terminal 1 — FastAPI Web Server
+
+```bash
+uvicorn app.main:app --reload
+```
+
+#### Terminal 2 — Worker
+
+```bash
+python -m app.worker
+```
+
+-----
+
+## ☁️ Deploy to Azure Container Apps
+
+The architecture maps naturally to **Azure Container Apps** — the web app and worker run as two separate container apps in a shared environment.
+
+```bash
+# Variables
+RG=rg-helpdesk
+LOCATION=westeurope
+ENV_NAME=helpdesk-env
+ACR_NAME=youracrname
+
+# Create resource group & Container Registry
+az group create -n $RG -l $LOCATION
+az acr create -n $ACR_NAME -g $RG --sku Basic --admin-enabled true
+az acr login -n $ACR_NAME
+
+# Build & push both images
+docker build --target web    -t $ACR_NAME.azurecr.io/helpdesk-web:latest    .
+docker build --target worker -t $ACR_NAME.azurecr.io/helpdesk-worker:latest .
+docker push $ACR_NAME.azurecr.io/helpdesk-web:latest
+docker push $ACR_NAME.azurecr.io/helpdesk-worker:latest
+
+# Create Container Apps environment
+az containerapp env create -n $ENV_NAME -g $RG -l $LOCATION
+
+# Deploy web app (with external ingress)
+az containerapp create \
+  -n helpdesk-web -g $RG \
+  --environment $ENV_NAME \
+  --image $ACR_NAME.azurecr.io/helpdesk-web:latest \
+  --registry-server $ACR_NAME.azurecr.io \
+  --target-port 8000 \
+  --ingress external \
+  --min-replicas 1 --max-replicas 3 \
+  --env-vars-file .env
+
+# Deploy worker (no ingress)
+az containerapp create \
+  -n helpdesk-worker -g $RG \
+  --environment $ENV_NAME \
+  --image $ACR_NAME.azurecr.io/helpdesk-worker:latest \
+  --registry-server $ACR_NAME.azurecr.io \
+  --min-replicas 1 --max-replicas 5 \
+  --env-vars-file .env
+```
+
+> **Tip:** For production, use Container Apps secrets or Azure Key Vault references instead of `--env-vars-file`.
 
 -----
 

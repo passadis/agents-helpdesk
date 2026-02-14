@@ -58,7 +58,7 @@
 import os
 import json
 
-from agent_framework import ChatAgent
+from agent_framework import RawAgent
 from agent_framework.azure import AzureOpenAIChatClient
 
 
@@ -93,9 +93,9 @@ async def decide_action(entity: dict) -> dict:
         "You must respond with ONLY valid JSON. No explanations, no markdown, just JSON."
     )
 
-    agent = ChatAgent(
+    agent = RawAgent(
         name="HelpdeskRouter",
-        chat_client=chat_client,
+        client=chat_client,
         instructions=instructions
     )
 

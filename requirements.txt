@@ -1,11 +1,12 @@
 fastapi==0.115.0
-uvicorn[standard]==0.30.6
+uvicorn[standard]>=0.31.1
 jinja2==3.1.4
 
-# Azure SDKs (we'll use them in next step)
+# Azure SDKs
 azure-data-tables==12.5.0
 azure-servicebus
-agent-framework==1.0.0b251108
+agent-framework-core>=1.0.0b251108
+agent-framework-azure-ai>=1.0.0b251108
 azure-communication-email
 # For loading env vars from .env (nice for local dev)
 python-dotenv==1.0.1
@@ -13,4 +14,4 @@ python-multipart
 
 # Teams + HTTP + Auth helpers
 requests>=2.31.0
-msal==1.23.0
+msal>=1.31.0
